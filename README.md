@@ -48,9 +48,6 @@ projeto_erros/
 ├── tests/
 │   ├── test_backend.py        # Testes das regras numéricas
 │   └── test_frontend.py       # Testes da janela e da exportação
-├── docs/
-│   ├── informacoes_trabalho_erros.pdf  # Enunciado original
-│   └── relatorio_validacao.pdf        # Relatório da primeira revisão
 ├── requirements.txt          # Dependência da interface: PySide6
 └── README.md
 ```
@@ -154,12 +151,3 @@ na janela, recuperação de erros e exportação CSV.
 No cancelamento, truncamento tem Ea = 0.00004 e Er indefinido; arredondamento tem
 Ea = 0.00006 e Er = 0.6 (60%). Na sequência, Ea é 0.00760 / 0.00140, respectivamente.
 
-**Inconsistência do PDF:** `1.1357`, `1.7035` e `2.2713` têm cinco dígitos
-significativos, embora o exemplo 3 peça quatro. O simulador segue quatro dígitos;
-a soma dos dois primeiros termos truncados é `1.135`. São dez termos acumulados
-começando em zero. O exemplo de cancelamento limita os operandos; o procedimento
-geral limita apenas o resultado. Ambas as opções continuam disponíveis.
-
-O relatório em `docs/` registra a primeira revisão, anterior à reorganização dos
-arquivos. Antes da entrega acadêmica, preencha os integrantes e suas contribuições
-reais. Publicação no GitHub e participação na apresentação cabem à equipe.

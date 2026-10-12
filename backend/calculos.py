@@ -1,31 +1,42 @@
 """Fluxo principal: operações, simulação da máquina e propagação de erros."""
+
 from decimal import Decimal, localcontext
+
 from backend.numeros import (
     ler_decimal, precisao_referencia, validar_configuracao,
     normalizar, ajustar_precisao, calcular_erros,
 )
 
-
+# funcao para realizar as quatro operações básicas com precisão de referência, sem limitar o resultado
 def operar(x, y, operacao, n_digitos=4):
-    """As quatro operações em precisão de referência, sem limitar o resultado."""
+    
     with localcontext() as contexto:
+        # definindo a precisao do contexto local para a operacao
         contexto.prec = precisao_referencia(x, y, minimo=max(50, n_digitos + 10))
+        
         if operacao == '+':
             return x + y
+        
         if operacao == '-':
             return x - y
+        
         if operacao == '*':
             return x * y
+        
         if operacao == '/':
+            # Verifica divisao por 0
             if y == 0:
                 raise ValueError('Divisão por zero não permitida.')
+        
             return x / y
+        
         raise ValueError('Operação inválida. Use +, -, * ou /.')
 
 
+# Funcao para realizar o calculo completo, incluindo a simulacao da maquina e o calculo dos erros
 def calcular(x, y, operacao, n_digitos, modo, limitar_operandos=False):
-    """Uma operação completa em cinco etapas, com um dicionário de resultados."""
-    # 1. Valida as escolhas e converte as entradas para Decimal.
+    
+    # 1. Valida as escolhas e converte as entradas para Decimal
     modo = validar_configuracao(n_digitos, modo)
     x = ler_decimal(x)
     y = ler_decimal(y)
@@ -33,12 +44,16 @@ def calcular(x, y, operacao, n_digitos, modo, limitar_operandos=False):
     # 2. Calcula a referência usando os números originais.
     referencia = operar(x, y, operacao, n_digitos)
 
-    # 3. Opcionalmente simula como a máquina armazena os operandos.
+    # 3. simula como a máquina armazena os operandos.
     x_aproximado = x
     y_aproximado = y
+
+    # se limitar_operandos for True, ajusta a precisão dos operandos antes de realizar a operação, simulando como a máquina armazenaria os valores.
+    # Caso contrário, utiliza os valores originais para o cálculo da referência.
     if limitar_operandos:
         x_aproximado = ajustar_precisao(x, n_digitos, modo)
         y_aproximado = ajustar_precisao(y, n_digitos, modo)
+
         resultado = operar(x_aproximado, y_aproximado, operacao, n_digitos)
     else:
         resultado = referencia
@@ -66,15 +81,19 @@ def calcular(x, y, operacao, n_digitos, modo, limitar_operandos=False):
     }
 
 
+# Funcao para somar o mesmo valor repetidamente, limitando cada resultado parcial
 def somar_sequencia(valor, quantidade, n_digitos, modo, limitar_operandos=False):
-    """Soma o mesmo termo repetidamente, limitando cada resultado parcial."""
-    modo = validar_configuracao(n_digitos, modo)
+    
+    modo = validar_configuracao(n_digitos, modo)  # validando o modo pela funcao que definimos
+
     if isinstance(quantidade, bool) or not isinstance(quantidade, int) or not 1 <= quantidade <= 1000:
         raise ValueError('Use entre 1 e 1000 termos inteiros.')
-    valor = ler_decimal(valor)
-    acumulado = Decimal(0)
-    passos = []
+    
+    valor = ler_decimal(valor)    # convertendo o valor para Decimal
+    acumulado = Decimal(0)   # inicializa o acumulado como Decimal(0) para garantir precisão
+    passos = []    # lista para armazenar os resultados de cada passo da soma
 
+    # laco para realizar a soma repetida do valor, limitando cada resultado parcial
     for indice in range(1, quantidade + 1):
         resultado = calcular(acumulado, valor, '+', n_digitos, modo, limitar_operandos)
         acumulado = resultado['aproximado']
@@ -100,6 +119,9 @@ def somar_sequencia(valor, quantidade, n_digitos, modo, limitar_operandos=False)
 
 def comparar_sequencia(valor, quantidade, n_digitos, limitar_operandos=False):
     """Executa a mesma sequência uma vez com cada método."""
+    
     truncamento = somar_sequencia(valor, quantidade, n_digitos, 'truncar', limitar_operandos)
+    
     arredondamento = somar_sequencia(valor, quantidade, n_digitos, 'arredondar', limitar_operandos)
+    
     return truncamento, arredondamento
